@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { StarBackground } from './components/StarBackground';
 import { DraggableWindow } from './components/DraggableWindow';
-import { Volume2, VolumeX } from 'lucide-react';
+import { Volume2, VolumeX, User, Link2, Images } from 'lucide-react';
 
 function App() {
   const [windows, setWindows] = useState({
@@ -10,15 +10,64 @@ function App() {
     gallery: false
   });
   const [isMuted, setIsMuted] = useState(false);
+  const [fullSizeImage, setFullSizeImage] = useState<string | null>(null);
+  const [windowZ, setWindowZ] = useState<Record<keyof typeof windows, number>>({
+    about: 50,
+    links: 50,
+    gallery: 50,
+  });
+  const [zCounter, setZCounter] = useState(60);
+
+  // Array foto-foto pets
+  const petImages = [
+    '/assets/img/cat-1.webp',
+    '/assets/img/cat-2.webp',
+    '/assets/img/cat-3.webp',
+    '/assets/img/cat-4.webp',
+    '/assets/img/cat-5.webp',
+    '/assets/img/dog-6.webp',
+  ];
 
   const toggleMute = () => setIsMuted(prev => !prev);
 
+  const bringWindowToFront = (key: keyof typeof windows) => {
+    setWindowZ(prev => ({
+      ...prev,
+      [key]: zCounter,
+    }));
+    setZCounter(prev => prev + 1);
+  };
+
   const toggleWindow = (key: keyof typeof windows) => {
+    const isOpening = !windows[key];
+
+    if (isOpening) {
+      bringWindowToFront(key);
+    }
+
     setWindows(prev => ({ ...prev, [key]: !prev[key] }));
 
     if (!isMuted) {
       const soundFile = windows[key] ? '/sfx/button-click-2.mp3' : '/sfx/button-click-1.mp3';
       const audio = new Audio(soundFile);
+      audio.volume = 0.5;
+      audio.play().catch(e => console.error("Audio play failed", e));
+    }
+  };
+
+  const openFullSizeImage = (image: string) => {
+    setFullSizeImage(image);
+    if (!isMuted) {
+      const audio = new Audio('/sfx/button-click-1.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(e => console.error("Audio play failed", e));
+    }
+  };
+
+  const closeFullSizeImage = () => {
+    setFullSizeImage(null);
+    if (!isMuted) {
+      const audio = new Audio('/sfx/button-click-2.mp3');
       audio.volume = 0.5;
       audio.play().catch(e => console.error("Audio play failed", e));
     }
@@ -43,11 +92,41 @@ function App() {
         onClose={() => toggleWindow('about')}
         initialPosition={{ x: 0, y: 0 }}
         isMuted={isMuted}
+        zIndex={windowZ.about}
+        onFocus={() => bringWindowToFront('about')}
+        stickyHeader={
+          <>
+            <div className="flex items-center gap-6">
+              {/* Profile Photo */}
+              <img
+                src="/cat-pfp.webp"
+                alt="Tirtha"
+                className="w-28 h-28 rounded-full object-cover border-2 border-neutral-700 flex-shrink-0"
+              />
+              {/* Name & Info */}
+              <div className="space-y-1.5">
+                <h2 className="text-3xl font-mono text-white">Nyoman Tirtha Yuda</h2>
+                <p className="text-lg text-neutral-400">a computer science student</p>
+                <p className="text-base text-neutral-500">currently studying at Manado State Polytechnic</p>
+              </div>
+            </div>
+            <div className="border-b border-neutral-700 mt-5" />
+          </>
+        }
       >
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-          Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-        </p>
+        <div className="space-y-4">
+          <p>
+            Hello! I'm Tirtha.
+            I’m just someone who enjoys learning, building things, and figuring stuff out along the way.
+          </p>
+          <p>
+          I like exploring ideas, trying new tools, and slowly turning thoughts into something real.
+          No rush, just learning step by step.
+          </p>
+          <p>
+          Thanks for stopping by.
+          </p>
+        </div>
       </DraggableWindow>
 
       <DraggableWindow
@@ -57,6 +136,8 @@ function App() {
         initialPosition={{ x: 20, y: 20 }}
         isMuted={isMuted}
         windowClassName="w-auto"
+        zIndex={windowZ.links}
+        onFocus={() => bringWindowToFront('links')}
       >
         <div className="flex flex-wrap justify-center gap-8 p-4" style={{ maxWidth: 'calc(4 * (80px + 32px))' }}>
           {/* Discord */}
@@ -109,26 +190,69 @@ function App() {
         onClose={() => toggleWindow('gallery')}
         initialPosition={{ x: -20, y: 40 }}
         isMuted={isMuted}
+        windowClassName="w-[900px]"
+        zIndex={windowZ.gallery}
+        onFocus={() => bringWindowToFront('gallery')}
       >
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur aliquet quam id dui posuere blandit.
-        </p>
+        <div className="px-6 pb-6">
+          <h2 className="text-3xl font-mono text-white mb-4 font-bold mt-12">
+            PETS
+          </h2>
+          <div className="grid grid-cols-3 gap-4">
+            {petImages.map((image, index) => (
+              <div
+                key={index}
+                className="aspect-square overflow-hidden rounded-lg cursor-pointer bg-neutral-800 transition-transform duration-300 ease-out transform-gpu hover:scale-105"
+                style={{ willChange: 'transform' }}
+                onClick={() => openFullSizeImage(image)}
+              >
+                <img
+                  src={image}
+                  alt={`Pet ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.error(`Failed to load image: ${image}`);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
       </DraggableWindow>
 
+      {/* Full Size Image Modal */}
+      {fullSizeImage && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          style={{ zIndex: 9999 }}
+          onClick={closeFullSizeImage}
+        >
+          <div className="relative max-w-[90vw] max-h-[90vh]">
+            <img
+              src={fullSizeImage}
+              alt="Full size pet"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-3xl min-h-[400px] bg-neutral-900/50 backdrop-blur-md border border-neutral-800 rounded-xl shadow-2xl animate-fade-in-up flex flex-col overflow-hidden">
+        <div className="w-full max-w-3xl min-h-[450px] bg-neutral-900/50 backdrop-blur-md border border-neutral-800 rounded-xl shadow-2xl animate-fade-in-up flex flex-col overflow-hidden">
           {/* Window Header */}
           <div className="h-10 bg-neutral-900/80 border-b border-neutral-800 flex items-center justify-between px-4 relative">
             <span className="text-sm font-medium text-neutral-400">home</span>
           </div>
 
           {/* Window Content */}
-          <div className="flex-1 flex flex-col items-center justify-center p-12 gap-6">
+          <div className="flex-1 flex flex-col items-center justify-center p-12 gap-10">
             <div className="text-center space-y-2">
-              <h1 className="text-5xl font-mono text-white tracking-tight">
+              <h1 className="text-6xl font-mono text-white tracking-tight">
                 hi! i'm tirtha
               </h1>
-              <p className="text-lg text-neutral-400 leading-relaxed max-w-lg mx-auto">
+              <p className="text-xl text-neutral-400 leading-relaxed max-w-lg mx-auto">
                 welcome to a quieter space
               </p>
             </div>
@@ -136,21 +260,24 @@ function App() {
             <div className="flex gap-4">
               <button
                 onClick={() => toggleWindow('about')}
-                className="px-6 py-2 bg-neutral-800 text-neutral-300 rounded-lg text-sm transition-transform hover:scale-105 active:scale-95 border border-neutral-700"
+                className="px-8 py-4 bg-neutral-800 text-neutral-300 rounded-lg text-base transition-transform hover:scale-105 active:scale-95 border border-neutral-700 flex flex-col items-center gap-2"
               >
-                About
+                <User size={24} />
+                <span>About</span>
               </button>
               <button
                 onClick={() => toggleWindow('links')}
-                className="px-6 py-2 bg-neutral-800 text-neutral-300 rounded-lg text-sm transition-transform hover:scale-105 active:scale-95 border border-neutral-700"
+                className="px-8 py-4 bg-neutral-800 text-neutral-300 rounded-lg text-base transition-transform hover:scale-105 active:scale-95 border border-neutral-700 flex flex-col items-center gap-2"
               >
-                Links
+                <Link2 size={24} />
+                <span>Links</span>
               </button>
               <button
                 onClick={() => toggleWindow('gallery')}
-                className="px-6 py-2 bg-neutral-800 text-neutral-300 rounded-lg text-sm transition-transform hover:scale-105 active:scale-95 border border-neutral-700"
+                className="px-8 py-4 bg-neutral-800 text-neutral-300 rounded-lg text-base transition-transform hover:scale-105 active:scale-95 border border-neutral-700 flex flex-col items-center gap-2"
               >
-                Gallery
+                <Images size={24} />
+                <span>Gallery</span>
               </button>
             </div>
           </div>
