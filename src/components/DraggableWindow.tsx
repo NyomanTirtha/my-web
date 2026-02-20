@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, ChevronDown } from 'lucide-react';
 
 interface WindowProps {
     title: string;
@@ -13,6 +13,7 @@ interface WindowProps {
     stickyHeader?: React.ReactNode;
     zIndex?: number;
     onFocus?: () => void;
+    isMobile?: boolean;
 }
 
 export const DraggableWindow = ({
@@ -26,7 +27,10 @@ export const DraggableWindow = ({
     stickyHeader,
     zIndex = 50,
     onFocus,
+    isMobile = false,
 }: WindowProps) => {
+    const [isDragging, setIsDragging] = useState(false);
+
     const handleClose = () => {
         if (!isMuted) {
             const audio = new Audio('/sfx/button-click-2.mp3');
@@ -36,21 +40,54 @@ export const DraggableWindow = ({
         onClose();
     };
 
+    // Mobile animations
+    const mobileInitial = { y: '100%', opacity: 0 };
+    const mobileAnimate = { y: 0, opacity: 1 };
+    const mobileExit = { y: '100%', opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } };
+
+    // Desktop animations
+    const desktopInitial = { opacity: 0, scale: 0.9, x: initialPosition.x, y: initialPosition.y };
+    const desktopAnimate = { opacity: 1, scale: 1, x: initialPosition.x, y: initialPosition.y };
+    const desktopExit = { opacity: 0, scale: 0.95, transition: { duration: 0.15 } };
+
     return (
         <AnimatePresence>
             {isOpen && (
                 <div
-                    className="fixed inset-0 flex items-center justify-center pointer-events-none"
+                    className={`fixed inset-0 pointer-events-none ${
+                        isMobile ? 'flex items-end' : 'flex items-center justify-center'
+                    }`}
                     style={{ zIndex }}
                 >
                     <motion.div
-                        drag
+                        drag={!isMobile}
                         dragMomentum={false}
-                        initial={{ opacity: 0, scale: 0.9, x: initialPosition.x, y: initialPosition.y }}
-                        animate={{ opacity: 1, scale: 1, x: initialPosition.x, y: initialPosition.y }}
-                        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
-                        onMouseDown={onFocus}
-                        className={`${windowClassName} bg-neutral-900/80 backdrop-blur-xl border border-neutral-700 rounded-xl shadow-2xl flex flex-col overflow-hidden pointer-events-auto`}
+                        dragElastic={0}
+                        dragTransition={{ bounceStiffness: 300, bounceDamping: 20 }}
+                        initial={isMobile ? mobileInitial : desktopInitial}
+                        animate={isMobile ? mobileAnimate : desktopAnimate}
+                        exit={isMobile ? mobileExit : desktopExit}
+                        onMouseDown={(e) => {
+                            if (!isMobile) {
+                                setIsDragging(true);
+                                onFocus?.();
+                            }
+                        }}
+                        onDragStart={() => {
+                            if (!isMobile) setIsDragging(true);
+                        }}
+                        onDragEnd={() => {
+                            if (!isMobile) setIsDragging(false);
+                        }}
+                        style={{
+                            willChange: 'transform',
+                            transform: 'translate3d(0, 0, 0)',
+                        }}
+                        className={`${
+                            isMobile 
+                                ? 'w-full max-h-[90vh] rounded-t-2xl' 
+                                : `${windowClassName} rounded-2xl`
+                        } bg-neutral-900 border border-neutral-700 shadow-2xl flex flex-col overflow-hidden pointer-events-auto transform-gpu`}
                     >
                         {/* Window Header */}
                         <div className="h-11 bg-neutral-800/50 border-b border-neutral-700 flex items-center justify-between px-4">
@@ -59,9 +96,47 @@ export const DraggableWindow = ({
                             </span>
                             <button
                                 onClick={handleClose}
-                                className="w-6 h-6 flex items-center justify-center rounded transition-transform hover:scale-110 active:scale-90"
+                                className="w-6 h-6 flex items-center justify-center rounded transform-gpu"
+                                style={{
+                                    willChange: 'transform',
+                                    transition: 'transform 0.15s ease-out'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isMobile) {
+                                        e.currentTarget.style.transform = 'scale(1.1)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isMobile) {
+                                        e.currentTarget.style.transform = 'scale(1)';
+                                    }
+                                }}
+                                onMouseDown={(e) => {
+                                    if (!isMobile) {
+                                        e.currentTarget.style.transform = 'scale(0.9)';
+                                    }
+                                }}
+                                onMouseUp={(e) => {
+                                    if (!isMobile) {
+                                        e.currentTarget.style.transform = 'scale(1.1)';
+                                    }
+                                }}
+                                onTouchStart={(e) => {
+                                    if (isMobile) {
+                                        e.currentTarget.style.transform = 'scale(0.9)';
+                                    }
+                                }}
+                                onTouchEnd={(e) => {
+                                    if (isMobile) {
+                                        e.currentTarget.style.transform = 'scale(1)';
+                                    }
+                                }}
                             >
-                                <X size={16} className="text-neutral-400 hover:text-white" />
+                                {isMobile ? (
+                                    <ChevronDown size={20} className="text-neutral-400" />
+                                ) : (
+                                    <X size={16} className="text-neutral-400 hover:text-white" />
+                                )}
                             </button>
                         </div>
 
@@ -73,7 +148,7 @@ export const DraggableWindow = ({
                         )}
 
                         {/* Scrollable Content */}
-                        <div className={`px-8 pb-8 ${stickyHeader ? '' : 'pt-8 flex-1 flex items-center'} text-neutral-300 text-base leading-relaxed overflow-y-auto max-h-[60vh] custom-scrollbar`}>
+                        <div className={`${isMobile ? 'px-4' : 'px-8'} pb-8 ${stickyHeader ? '' : isMobile ? 'pt-4' : 'pt-8 flex-1'} text-neutral-300 text-base leading-relaxed overflow-y-auto ${isMobile ? 'max-h-[calc(90vh-44px)]' : 'max-h-[60vh]'} custom-scrollbar`}>
                             <div className="w-full">
                                 {children}
                             </div>
