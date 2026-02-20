@@ -29,7 +29,6 @@ export const DraggableWindow = ({
     onFocus,
     isMobile = false,
 }: WindowProps) => {
-    const [isDragging, setIsDragging] = useState(false);
 
     const handleClose = () => {
         if (!isMuted) {
@@ -43,12 +42,13 @@ export const DraggableWindow = ({
     // Mobile animations
     const mobileInitial = { y: '100%', opacity: 0 };
     const mobileAnimate = { y: 0, opacity: 1 };
-    const mobileExit = { y: '100%', opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } };
+    // cast to any so Framer Motion's strict transition typing doesn't complain about string easing
+    const mobileExit: any = { y: '100%', opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } };
 
     // Desktop animations
     const desktopInitial = { opacity: 0, scale: 0.9, x: initialPosition.x, y: initialPosition.y };
     const desktopAnimate = { opacity: 1, scale: 1, x: initialPosition.x, y: initialPosition.y };
-    const desktopExit = { opacity: 0, scale: 0.95, transition: { duration: 0.15 } };
+    const desktopExit: any = { opacity: 0, scale: 0.95, transition: { duration: 0.15 } };
 
     return (
         <AnimatePresence>
@@ -67,17 +67,17 @@ export const DraggableWindow = ({
                         initial={isMobile ? mobileInitial : desktopInitial}
                         animate={isMobile ? mobileAnimate : desktopAnimate}
                         exit={isMobile ? mobileExit : desktopExit}
-                        onMouseDown={(e) => {
+                        onMouseDown={() => {
                             if (!isMobile) {
-                                setIsDragging(true);
                                 onFocus?.();
                             }
                         }}
+                        // drag handlers remain, no dragging state tracked
                         onDragStart={() => {
-                            if (!isMobile) setIsDragging(true);
+                            /* nothing */
                         }}
                         onDragEnd={() => {
-                            if (!isMobile) setIsDragging(false);
+                            /* nothing */
                         }}
                         style={{
                             willChange: 'transform',
