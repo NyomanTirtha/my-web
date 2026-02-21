@@ -54,9 +54,8 @@ export const DraggableWindow = ({
         <AnimatePresence>
             {isOpen && (
                 <div
-                    className={`fixed inset-0 pointer-events-none ${
-                        isMobile ? 'flex items-end' : 'flex items-center justify-center'
-                    }`}
+                    className={`fixed inset-0 pointer-events-none ${isMobile ? 'flex items-end' : 'flex items-center justify-center'
+                        }`}
                     style={{ zIndex }}
                 >
                     <motion.div
@@ -83,11 +82,10 @@ export const DraggableWindow = ({
                             willChange: 'transform',
                             transform: 'translate3d(0, 0, 0)',
                         }}
-                        className={`${
-                            isMobile 
-                                ? 'w-full max-h-[90vh] rounded-t-2xl' 
+                        className={`${isMobile
+                                ? 'w-full max-h-[90vh] rounded-t-2xl'
                                 : `${windowClassName} rounded-2xl`
-                        } bg-neutral-900 border border-neutral-700 shadow-2xl flex flex-col overflow-hidden pointer-events-auto transform-gpu`}
+                            } bg-neutral-900 border border-neutral-700 shadow-2xl flex flex-col overflow-hidden pointer-events-auto transform-gpu`}
                     >
                         {/* Window Header */}
                         <div className="h-11 bg-neutral-800/50 border-b border-neutral-700 flex items-center justify-between px-4">
