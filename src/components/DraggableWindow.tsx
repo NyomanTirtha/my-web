@@ -78,13 +78,9 @@ export const DraggableWindow = ({
                         onDragEnd={() => {
                             /* nothing */
                         }}
-                        style={{
-                            willChange: 'transform',
-                            transform: 'translate3d(0, 0, 0)',
-                        }}
                         className={`${isMobile
-                                ? 'w-full max-h-[90vh] rounded-t-2xl'
-                                : `${windowClassName} rounded-2xl`
+                            ? 'w-full max-h-[90vh] rounded-t-2xl'
+                            : `${windowClassName} rounded-2xl`
                             } bg-neutral-900 border border-neutral-700 shadow-2xl flex flex-col overflow-hidden pointer-events-auto transform-gpu`}
                     >
                         {/* Window Header */}

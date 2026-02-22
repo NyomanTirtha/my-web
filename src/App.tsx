@@ -252,13 +252,14 @@ function App() {
             {petImages.map((image, index) => (
               <div
                 key={index}
-                className="aspect-square overflow-hidden rounded-lg cursor-pointer bg-neutral-800 transition-transform duration-300 ease-out transform-gpu hover:scale-105"
-                style={{ willChange: 'transform' }}
+                className="aspect-square overflow-hidden rounded-lg cursor-pointer bg-neutral-800 transition-transform duration-300 ease-out hover:scale-105"
                 onClick={() => openFullSizeImage(image)}
               >
                 <img
                   src={image}
                   alt={`Pet ${index + 1}`}
+                  loading={index < 4 ? "eager" : "lazy"}
+                  decoding="async"
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     console.error(`Failed to load image: ${image}`);
@@ -282,6 +283,8 @@ function App() {
             <img
               src={fullSizeImage}
               alt="Full size pet"
+              loading="lazy"
+              decoding="async"
               className="max-w-full max-h-[90vh] object-contain rounded-lg"
               onClick={(e) => e.stopPropagation()}
             />
