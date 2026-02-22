@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { StarBackground } from './components/StarBackground';
 import { DraggableWindow } from './components/DraggableWindow';
 import { Volume2, VolumeX, User, Link2, Images } from 'lucide-react';
+import DecryptedText from "./components/DecryptedText";
 
 function App() {
   const [windows, setWindows] = useState({
@@ -304,7 +305,18 @@ function App() {
           <div className="flex-1 flex flex-col items-center justify-center mt-10 p-12 gap-10">
             <div className="text-center space-y-2">
               <h1 className="text-6xl font-mono text-white tracking-tight">
-                hi! <span className="font-bold">i'm tirtha</span>
+                hi!{" "}
+                <DecryptedText
+                  text="i'm tirtha"
+                  animateOn="view"
+                  speed={80}
+                  maxIterations={15}
+                  sequential
+                  revealDirection="start"
+                  characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+                  className="font-bold text-white"
+                  encryptedClassName="text-neutral-500"
+                />
               </h1>
               <p className="text-xl text-neutral-400 leading-relaxed max-w-lg mx-auto">
                 welcome to a quieter space
