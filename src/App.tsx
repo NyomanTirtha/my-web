@@ -400,9 +400,20 @@ function App() {
         {/* Mobile View - No Card */}
         <div className="md:hidden w-full flex flex-col items-center justify-center px-4 py-12 gap-8">
           <div className="text-center space-y-3">
-            <h1 className="text-4xl font-mono text-white tracking-tight">
-              hi! <span className="font-bold">i'm tirtha</span>
-            </h1>
+              <h1 className="text-4xl font-mono text-white tracking-tight">
+                hi!{" "}
+                <DecryptedText
+                  text="i'm tirtha"
+                  animateOn="view"
+                  speed={80}
+                  maxIterations={15}
+                  sequential
+                  revealDirection="start"
+                  characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+                  className="font-bold text-white"
+                  encryptedClassName="text-neutral-500"
+                />
+              </h1>
             <p className="text-lg text-neutral-400 leading-relaxed">
               welcome to a quieter space
             </p>
