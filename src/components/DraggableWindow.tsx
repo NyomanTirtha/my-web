@@ -42,9 +42,9 @@ export const DraggableWindow = ({
 
     // Mobile animations
     const mobileInitial = { y: '100%', opacity: 0 };
-    const mobileAnimate = { y: 0, opacity: 1 };
+    const mobileAnimate: any = { y: 0, opacity: 1, transition: { type: 'tween', duration: 0.3, ease: 'easeInOut' } };
     // cast to any so Framer Motion's strict transition typing doesn't complain about string easing
-    const mobileExit: any = { y: '100%', opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } };
+    const mobileExit: any = { y: '100%', opacity: 0, transition: { type: 'tween', duration: 0.3, ease: 'easeInOut' } };
 
     // Desktop animations
     const desktopInitial = { opacity: 0, scale: 0.9, x: initialPosition.x, y: initialPosition.y };
