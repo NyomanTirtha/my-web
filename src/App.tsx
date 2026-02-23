@@ -26,6 +26,31 @@ function App() {
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
+
+    // Preload gallery images more aggressively using HTML link tags
+    const petImagesToPreload = [
+      '/assets/img/cat-1.webp',
+      '/assets/img/cat-2.webp',
+      '/assets/img/cat-3.webp',
+      '/assets/img/cat-4.webp',
+      '/assets/img/cat-5.webp',
+      '/assets/img/dog-6.webp',
+      '/assets/img/cat-7.webp',
+      '/assets/img/cat-8.webp',
+      '/assets/img/cat-9.webp',
+    ];
+
+    petImagesToPreload.forEach((src) => {
+      // Check if it's already preloaded to avoid duplicates on re-renders (like in React StrictMode)
+      if (!document.querySelector(`link[rel="preload"][href="${src}"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.href = src;
+        document.head.appendChild(link);
+      }
+    });
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -400,20 +425,20 @@ function App() {
         {/* Mobile View - No Card */}
         <div className="md:hidden w-full flex flex-col items-center justify-center px-4 py-12 gap-8">
           <div className="text-center space-y-3">
-              <h1 className="text-4xl font-mono text-white tracking-tight">
-                hi!{" "}
-                <DecryptedText
-                  text="i'm tirtha"
-                  animateOn="view"
-                  speed={80}
-                  maxIterations={15}
-                  sequential
-                  revealDirection="start"
-                  characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-                  className="font-bold text-white"
-                  encryptedClassName="text-neutral-500"
-                />
-              </h1>
+            <h1 className="text-4xl font-mono text-white tracking-tight">
+              hi!{" "}
+              <DecryptedText
+                text="i'm tirtha"
+                animateOn="view"
+                speed={80}
+                maxIterations={15}
+                sequential
+                revealDirection="start"
+                characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+                className="font-bold text-white"
+                encryptedClassName="text-neutral-500"
+              />
+            </h1>
             <p className="text-lg text-neutral-400 leading-relaxed">
               welcome to a quieter space
             </p>

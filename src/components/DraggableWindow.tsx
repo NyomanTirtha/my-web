@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { X, ChevronDown } from 'lucide-react';
 
 interface WindowProps {
@@ -29,6 +29,7 @@ export const DraggableWindow = ({
     onFocus,
     isMobile = false,
 }: WindowProps) => {
+    const dragControls = useDragControls();
 
     const handleClose = () => {
         if (!isMuted) {
@@ -60,6 +61,8 @@ export const DraggableWindow = ({
                 >
                     <motion.div
                         drag={!isMobile}
+                        dragControls={dragControls}
+                        dragListener={false}
                         dragMomentum={false}
                         dragElastic={0}
                         dragTransition={{ bounceStiffness: 300, bounceDamping: 20 }}
@@ -84,12 +87,21 @@ export const DraggableWindow = ({
                             } bg-neutral-900 border border-neutral-700 shadow-2xl flex flex-col overflow-hidden pointer-events-auto transform-gpu`}
                     >
                         {/* Window Header */}
-                        <div className="h-11 bg-neutral-800/50 border-b border-neutral-700 flex items-center justify-between px-4">
-                            <span className="text-sm font-medium text-neutral-400">
+                        <div
+                            className="h-11 bg-neutral-800/50 border-b border-neutral-700 flex items-center justify-between px-4"
+                            onPointerDown={(e) => {
+                                if (!isMobile) {
+                                    dragControls.start(e);
+                                }
+                            }}
+                            style={{ touchAction: 'none' }}
+                        >
+                            <span className="text-sm font-medium text-neutral-400 select-none">
                                 {title}
                             </span>
                             <button
                                 onClick={handleClose}
+                                onPointerDown={(e) => e.stopPropagation()}
                                 className="w-6 h-6 flex items-center justify-center rounded transform-gpu"
                                 style={{
                                     willChange: 'transform',
