@@ -29,6 +29,7 @@ export const DraggableWindow = ({
     onFocus,
     isMobile = false,
 }: WindowProps) => {
+
     const dragControls = useDragControls();
 
     const handleClose = () => {
@@ -42,9 +43,9 @@ export const DraggableWindow = ({
 
     // Mobile animations
     const mobileInitial = { y: '100%', opacity: 0 };
-    const mobileAnimate: any = { y: 0, opacity: 1, transition: { type: 'tween', duration: 0.3, ease: 'easeInOut' } };
+    const mobileAnimate = { y: 0, opacity: 1 };
     // cast to any so Framer Motion's strict transition typing doesn't complain about string easing
-    const mobileExit: any = { y: '100%', opacity: 0, transition: { type: 'tween', duration: 0.3, ease: 'easeInOut' } };
+    const mobileExit: any = { y: '100%', opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } };
 
     // Desktop animations
     const desktopInitial = { opacity: 0, scale: 0.9, x: initialPosition.x, y: initialPosition.y };
@@ -81,27 +82,28 @@ export const DraggableWindow = ({
                         onDragEnd={() => {
                             /* nothing */
                         }}
+                        style={{
+                            willChange: 'transform',
+                            transform: 'translate3d(0, 0, 0)',
+                        }}
                         className={`${isMobile
-                            ? 'w-full max-h-[90vh] rounded-t-2xl'
-                            : `${windowClassName} rounded-2xl`
+                                ? 'w-full max-h-[90vh] rounded-t-2xl'
+                                : `${windowClassName} rounded-2xl`
                             } bg-neutral-900 border border-neutral-700 shadow-2xl flex flex-col overflow-hidden pointer-events-auto transform-gpu`}
                     >
-                        {/* Window Header */}
+                        {/* Window Header — drag handle */}
                         <div
                             className="h-11 bg-neutral-800/50 border-b border-neutral-700 flex items-center justify-between px-4"
+                            style={{ cursor: isMobile ? 'default' : 'grab' }}
                             onPointerDown={(e) => {
-                                if (!isMobile) {
-                                    dragControls.start(e);
-                                }
+                                if (!isMobile) dragControls.start(e);
                             }}
-                            style={{ touchAction: 'none' }}
                         >
-                            <span className="text-sm font-medium text-neutral-400 select-none">
+                            <span className="text-sm font-medium text-neutral-400">
                                 {title}
                             </span>
                             <button
                                 onClick={handleClose}
-                                onPointerDown={(e) => e.stopPropagation()}
                                 className="w-6 h-6 flex items-center justify-center rounded transform-gpu"
                                 style={{
                                     willChange: 'transform',
