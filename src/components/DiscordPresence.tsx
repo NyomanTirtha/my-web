@@ -67,17 +67,52 @@ export function LanyardProvider({ children }: { children: React.ReactNode }) {
     const [data, setData] = useState<LanyardData | null>(null);
 
     useEffect(() => {
-        let cancelled = false;
-        const fetch_ = async () => {
-            try {
-                const res = await fetch(`https://api.lanyard.rest/v1/users/${USER_ID}`);
-                const json = await res.json();
-                if (!cancelled && json.success) setData(json.data);
-            } catch { /* silent */ }
+        let ws: WebSocket;
+        let heartbeatId: ReturnType<typeof setInterval>;
+        let reconnectId: ReturnType<typeof setTimeout>;
+        let dead = false;
+
+        const connect = () => {
+            if (dead) return;
+            ws = new WebSocket('wss://api.lanyard.rest/socket');
+
+            ws.onmessage = (e) => {
+                const msg = JSON.parse(e.data);
+
+                // op 1 = Hello → start heartbeat + subscribe
+                if (msg.op === 1) {
+                    const interval = msg.d.heartbeat_interval;
+                    heartbeatId = setInterval(() => {
+                        if (ws.readyState === WebSocket.OPEN)
+                            ws.send(JSON.stringify({ op: 3 }));
+                    }, interval);
+
+                    // Subscribe to user
+                    ws.send(JSON.stringify({ op: 2, d: { subscribe_to_id: USER_ID } }));
+                }
+
+                // op 0 = Event (INIT_STATE or PRESENCE_UPDATE)
+                if (msg.op === 0 && (msg.t === 'INIT_STATE' || msg.t === 'PRESENCE_UPDATE')) {
+                    if (!dead) setData(msg.d);
+                }
+            };
+
+            ws.onclose = () => {
+                clearInterval(heartbeatId);
+                if (!dead) reconnectId = setTimeout(connect, 3000); // auto-reconnect in 3s
+            };
+
+            ws.onerror = () => ws.close();
         };
-        fetch_();
-        const id = setInterval(fetch_, 30_000);
-        return () => { cancelled = true; clearInterval(id); };
+
+        connect();
+
+        return () => {
+            dead = true;
+            clearInterval(heartbeatId);
+            clearTimeout(reconnectId);
+            ws?.close();
+        };
     }, []);
 
     return <LanyardCtx.Provider value={data}>{children}</LanyardCtx.Provider>;
