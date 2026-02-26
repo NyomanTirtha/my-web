@@ -22,6 +22,8 @@ function App() {
   });
   const [zCounter, setZCounter] = useState(60);
   const [isMobile, setIsMobile] = useState(false);
+  const [decryptKey, setDecryptKey] = useState(0);
+  const [decryptDirection, setDecryptDirection] = useState<'start' | 'center' | 'end'>('start');
 
   useEffect(() => {
     const checkMobile = () => {
@@ -55,6 +57,16 @@ function App() {
     });
 
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Replay decrypt animation every 5 seconds with a random reveal direction
+  useEffect(() => {
+    const directions: ('start' | 'center' | 'end')[] = ['start', 'center', 'end'];
+    const id = setInterval(() => {
+      setDecryptDirection(directions[Math.floor(Math.random() * directions.length)]);
+      setDecryptKey(k => k + 1);
+    }, 5000);
+    return () => clearInterval(id);
   }, []);
 
   // Array foto-foto pets
@@ -362,12 +374,13 @@ function App() {
                 <h1 className="text-6xl font-mono text-white tracking-tight">
                   hi!{" "}
                   <DecryptedText
+                    key={decryptKey}
                     text="i'm tirtha"
                     animateOn="view"
                     speed={80}
                     maxIterations={15}
                     sequential
-                    revealDirection="start"
+                    revealDirection={decryptDirection}
                     characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
                     className="font-bold text-white"
                     encryptedClassName="text-neutral-500"
@@ -458,12 +471,13 @@ function App() {
               <h1 className="text-4xl font-mono text-white tracking-tight">
                 hi!{" "}
                 <DecryptedText
+                  key={decryptKey}
                   text="i'm tirtha"
                   animateOn="view"
                   speed={80}
                   maxIterations={15}
                   sequential
-                  revealDirection="start"
+                  revealDirection={decryptDirection}
                   characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
                   className="font-bold text-white"
                   encryptedClassName="text-neutral-500"
