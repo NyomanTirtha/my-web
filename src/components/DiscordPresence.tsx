@@ -370,10 +370,7 @@ export function DiscordPresenceContent() {
                 <SpotifyCard spotify={data.spotify} />
             )}
 
-            {/* Empty state */}
-            {!hasContent && (
-                <p className="text-xs text-neutral-600 text-center py-2">No activity right now.</p>
-            )}
+
         </div>
     );
 }
