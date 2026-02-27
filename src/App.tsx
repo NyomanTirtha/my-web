@@ -177,7 +177,6 @@ function App() {
             </p>
             <p>
               I like exploring ideas, trying new tools, and slowly turning thoughts into something real.
-              No rush, just learning step by step.
             </p>
             <p>
               Thanks for stopping by.
