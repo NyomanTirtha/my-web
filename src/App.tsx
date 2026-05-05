@@ -543,7 +543,7 @@ function App() {
           </div>
 
           <footer className="absolute bottom-6 text-neutral-500 text-sm">
-            &copy; 2026 Tirtha
+            &copy; {new Date().getFullYear()} Tirtha
           </footer>
         </div>
       </>
